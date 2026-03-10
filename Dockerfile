@@ -1,17 +1,15 @@
-# Usar Java 21
 FROM eclipse-temurin:21-jdk-jammy
 
-# Carpeta de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiar todo el proyecto al contenedor
+# Copiar el proyecto
 COPY . .
 
-# Dar permiso al wrapper de Maven
+# Dar permisos a Maven wrapper
 RUN chmod +x mvnw
 
 # Compilar la aplicación
 RUN ./mvnw clean package -DskipTests
 
 # Ejecutar la aplicación
-CMD ["java","-jar","target/*.jar"]
+CMD java -jar target/*.jar

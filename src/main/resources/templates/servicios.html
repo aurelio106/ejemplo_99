@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+            href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css"
+            rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/inicio.css}" />
+    <link rel="stylesheet" th:href="@{/css/servicios.css}" />
+    <title>SaludCuidado - Servicios</title>
+</head>
+<body>
+<!-- Incluir el fragmento del banner principal -->
+<div th:replace="fragments/fragments :: header(activeLink=${activeLink})"></div>
+
+<main>
+    <section class="section__container page-title">
+        <h1>Nuestros Servicios</h1>
+        <p>Descubre la amplia gama de servicios médicos que ofrecemos para cuidar de tu salud</p>
+    </section>
+
+    <section class="section__container services-grid">
+        <!-- Servicios dinámicos desde la base de datos -->
+        <div th:each="servicio : ${servicios}" class="service-card">
+            <div class="service-icon">
+                <i th:class="${servicio.icono}"></i>
+            </div>
+            <div class="service-content">
+                <h3 th:text="${servicio.nombre}">Nombre del Servicio</h3>
+                <p th:text="${servicio.descripcion}">Descripción del servicio.</p>
+                <div class="service-details">
+                    <span class="service-duration">
+                        <i class="ri-time-line"></i> Duración: <span th:text="${servicio.duracionMinutos}">30</span> minutos
+                    </span>
+                    <a href="/reservar" class="service-link" th:if="${#authorization.expression('isAuthenticated()')}">
+                        Solicitar Servicio <i class="ri-arrow-right-line"></i>
+                    </a>
+                    <a href="/login" class="service-link" th:unless="${#authorization.expression('isAuthenticated()')}">
+                        Iniciar Sesión para Solicitar <i class="ri-arrow-right-line"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Servicios estáticos si no hay datos en la BD -->
+        <div th:if="${#lists.isEmpty(servicios)}" class="service-card">
+            <div class="service-icon">
+                <i class="ri-microscope-line"></i>
+            </div>
+            <div class="service-content">
+                <h3>Prueba de Laboratorio</h3>
+                <p>Diagnósticos precisos, resultados rápidos: experimenta pruebas de laboratorio de primera calidad en nuestras instalaciones. Nuestro equipo de técnicos altamente capacitados utiliza tecnología de vanguardia para garantizar resultados precisos y oportunos.</p>
+                <div class="service-details">
+                    <span class="service-duration">
+                        <i class="ri-time-line"></i> Duración: 30 minutos
+                    </span>
+                    <a href="/reservar" class="service-link" th:if="${#authorization.expression('isAuthenticated()')}">
+                        Solicitar Servicio <i class="ri-arrow-right-line"></i>
+                    </a>
+                    <a href="/login" class="service-link" th:unless="${#authorization.expression('isAuthenticated()')}">
+                        Iniciar Sesión para Solicitar <i class="ri-arrow-right-line"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(servicios)}" class="service-card">
+            <div class="service-icon">
+                <i class="ri-mental-health-line"></i>
+            </div>
+            <div class="service-content">
+                <h3>Chequeo de Salud</h3>
+                <p>Nuestras evaluaciones exhaustivas y valoraciones expertas te ayudan a mantenerte proactivo con tu salud. Realizamos un análisis completo de tu estado físico actual y te proporcionamos recomendaciones personalizadas para mejorar tu bienestar general.</p>
+                <div class="service-details">
+                    <span class="service-duration">
+                        <i class="ri-time-line"></i> Duración: 60 minutos
+                    </span>
+                    <a href="/reservar" class="service-link" th:if="${#authorization.expression('isAuthenticated()')}">
+                        Solicitar Servicio <i class="ri-arrow-right-line"></i>
+                    </a>
+                    <a href="/login" class="service-link" th:unless="${#authorization.expression('isAuthenticated()')}">
+                        Iniciar Sesión para Solicitar <i class="ri-arrow-right-line"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Incluir el fragmento del footer -->
+<div th:replace="fragments/fragments :: footer"></div>
+</body>
+</html>

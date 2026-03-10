@@ -1,0 +1,109 @@
+version: "3.9"
+
+services:
+
+  # ==========================
+  # MySQL
+  # ==========================
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: clinica3_auth
+      MYSQL_USER: servicio
+      MYSQL_PASSWORD: servicio
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - clinica-network
+
+
+  # ==========================
+  # MongoDB
+  # ==========================
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: clinica2
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    command: mongod --bind_ip_all
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - clinica-network
+
+
+  # ==========================
+  # Aplicación Spring Boot
+  # ==========================
+  app:
+    build: .
+    container_name: spring-app
+    restart: always
+
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+      # MySQL
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/clinica3_auth?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: servicio
+      SPRING_DATASOURCE_PASSWORD: servicio
+
+      # MongoDB
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/clinica2
+      SPRING_DATA_MONGODB_DATABASE: clinica2
+
+      SERVER_PORT: 8080
+      SPRING_APPLICATION_NAME: sistema-citas-medicas
+
+    volumes:
+      - ./uploads:/app/uploads
+      - ./src/main/resources/static:/app/static
+
+    networks:
+      - clinica-network
+
+
+# ==========================
+# Volúmenes
+# ==========================
+volumes:
+  mysql-data:
+  mongodb-data:
+
+
+# ==========================
+# Red
+# ==========================
+networks:
+  clinica-network:
+    driver: bridge

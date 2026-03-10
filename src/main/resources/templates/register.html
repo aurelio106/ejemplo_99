@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - SaludCuidado</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body>
+<div class="background"></div>
+
+<div class="login-container">
+    <!-- Logo de la clínica -->
+    <div class="clinic-logo">
+        <h1>Salud<span>Cuidado</span></h1>
+    </div>
+
+    <div class="center">
+        <h2 id="form-title">Registro</h2>
+
+        <!-- Mensaje de error -->
+        <div th:if="${error}" class="error-message">
+            <p th:text="${error}"></p>
+        </div>
+
+        <form id="register-form" method="post" th:action="@{/register}">
+            <div class="txt_field">
+                <input type="text" name="username" required>
+                <span></span>
+                <label><i class="ri-user-line"></i> Usuario</label>
+            </div>
+            <div class="txt_field">
+                <input type="email" name="email" required>
+                <span></span>
+                <label><i class="ri-mail-line"></i> Correo</label>
+            </div>
+            <div class="txt_field">
+                <input type="password" name="password" required>
+                <span></span>
+                <label><i class="ri-lock-line"></i> Contraseña</label>
+            </div>
+            <input type="submit" value="Registrarse">
+            <div class="signup_link">
+                ¿Ya tienes una cuenta? <a href="/login">Volver a Login</a>
+            </div>
+            <div class="home_link">
+                <a href="/inicio"><i class="ri-home-line"></i> Volver a Inicio</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Script para mensajes temporales -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Seleccionar todos los mensajes de error y éxito
+        const messages = document.querySelectorAll('.error-message, .success-message');
+
+        // Si hay mensajes, configurar temporizador para ocultarlos
+        if (messages.length > 0) {
+            messages.forEach(message => {
+                // Agregar clase para la animación de entrada
+                message.classList.add('message-show');
+
+                // Configurar temporizador para ocultar después de 3 segundos
+                setTimeout(() => {
+                    // Agregar clase para la animación de salida
+                    message.classList.add('message-hide');
+
+                    // Eliminar el mensaje después de que termine la animación
+                    setTimeout(() => {
+                        message.style.display = 'none';
+                    }, 500); // 500ms para la animación de desvanecimiento
+                }, 3000); // 3 segundos
+            });
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<nav th:fragment="navbar" class="nav">
+    <div class="nav__container">
+        <div class="nav__logo">Salud<span>Cuidado</span></div>
+        <ul class="nav__links">
+            <li class="link"><a href="/" th:classappend="${#httpServletRequest.requestURI == '/' ? 'active' : ''}">Inicio</a></li>
+            <li class="link"><a href="/#about" th:classappend="${#httpServletRequest.requestURI == '/#about' ? 'active' : ''}">Sobre Nosotros</a></li>
+            <li class="link"><a href="/servicios" th:classappend="${#httpServletRequest.requestURI == '/servicios' ? 'active' : ''}">Servicios</a></li>
+            <li class="link"><a href="/doctores" th:classappend="${#httpServletRequest.requestURI == '/doctores' ? 'active' : ''}">Doctores</a></li>
+            <li class="link" th:if="${#authorization.expression('isAuthenticated()')}">
+                <a href="/mis-citas" th:classappend="${#httpServletRequest.requestURI == '/mis-citas' ? 'active' : ''}">Mis Citas</a>
+            </li>
+            <li class="link" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                <a href="/admin" th:classappend="${#httpServletRequest.requestURI == '/admin' ? 'active' : ''}">Panel Admin</a>
+            </li>
+        </ul>
+        <div class="nav__actions">
+            <div th:if="${#authorization.expression('isAuthenticated()')}">
+                <span th:text="${#authentication.name}" class="username"></span>
+                <a href="/logout" class="btn btn-logout">Cerrar sesión</a>
+            </div>
+            <div th:unless="${#authorization.expression('isAuthenticated()')}">
+                <a href="/login" class="btn btn-login">Iniciar sesión</a>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>
+

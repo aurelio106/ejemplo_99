@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+            href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css"
+            rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/inicio.css}" />
+    <title>SaludCuidado - Inicio</title>
+    <style>
+        /* Estilos para el carrusel de servicios */
+        .services__carousel {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            padding: 0 50px;
+        }
+
+        .services__carousel-container {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .service__card {
+            min-width: 100%;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            max-width: 500px;
+        }
+
+        .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background-color: #f39c12;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            border: none;
+            font-size: 1.5rem;
+        }
+
+        .carousel-arrow:hover {
+            background-color: #e67e22;
+        }
+
+        .carousel-arrow.prev {
+            left: 0;
+        }
+
+        .carousel-arrow.next {
+            right: 0;
+        }
+
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+            gap: 0.5rem;
+        }
+
+        .carousel-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ccc;
+            cursor: pointer;
+        }
+
+        .carousel-indicator.active {
+            background-color: #f39c12;
+        }
+    </style>
+</head>
+<body>
+<!-- Incluir el fragmento del banner principal -->
+<div th:replace="fragments/fragments :: header(activeLink=${activeLink})"></div>
+
+<main>
+    <div class="header__container" id="home">
+        <div class="header__content">
+            <h1 class="header__title">Brindando una Experiencia Excepcional para el Paciente</h1>
+            <p class="header__description">
+                Bienvenido a SaludCuidado, donde las experiencias excepcionales para el paciente son nuestra prioridad.
+                Con cuidado compasivo, instalaciones de última generación y un enfoque centrado en el paciente, estamos dedicados a tu bienestar.
+            </p>
+            <div class="header__buttons">
+                <a href="#services" class="btn btn-primary">Ver Servicios</a>
+                <a href="/reservar" class="btn btn-secondary" th:if="${#authorization.expression('isAuthenticated()')}">Reservar Cita</a>
+                <a href="/login" class="btn btn-secondary" th:unless="${#authorization.expression('isAuthenticated()')}">Iniciar Sesión para Reservar</a>
+            </div>
+        </div>
+        <div class="header__image">
+            <img th:src="@{/image/imagene.png}" alt="Doctor" />
+        </div>
+    </div>
+
+    <section class="services" id="services">
+        <div class="section__container">
+            <div class="services__header">
+                <div class="services__header__content">
+                    <h2 class="section__title">Nuestros Servicios Especializados</h2>
+                    <p>
+                        Ofrecemos una amplia gama de servicios médicos de alta calidad para satisfacer todas tus necesidades de salud.
+                    </p>
+                </div>
+                <a href="/servicios" class="btn btn-outline">Ver Todos los Servicios</a>
+            </div>
+
+            <!-- Carrusel de servicios con flechas de navegación -->
+            <div class="services__carousel">
+                <button class="carousel-arrow prev" id="prevService">
+                    <i class="ri-arrow-left-s-line"></i>
+                </button>
+
+                <div class="services__carousel-container" id="servicesCarousel">
+                    <!-- Servicios dinámicos desde la base de datos -->
+                    <div th:each="servicio, iterStat : ${servicios}" class="service__card" th:attr="data-index=${iterStat.index}">
+                        <span><i th:class="${servicio.icono}"></i></span>
+                        <h4 th:text="${servicio.nombre}">Nombre del Servicio</h4>
+                        <p th:text="${#strings.abbreviate(servicio.descripcion, 150)}">
+                            Descripción del servicio.
+                        </p>
+                        <!-- Redirigir a la sección de servicios en la misma página -->
+                        <a href="servicios">Saber más</a>
+                    </div>
+
+                    <!-- Servicios estáticos si no hay datos en la BD -->
+                    <div th:if="${#lists.isEmpty(servicios)}" class="service__card" data-index="0">
+                        <span><i class="ri-heart-pulse-line"></i></span>
+                        <h4>Cardiología</h4>
+                        <p>
+                            Cuidado integral del corazón con tecnología de vanguardia y especialistas altamente calificados.
+                        </p>
+                        <!-- Redirigir a la sección de servicios en la misma página -->
+                        <a href="#services">Saber más</a>
+                    </div>
+                    <div th:if="${#lists.isEmpty(servicios)}" class="service__card" data-index="1">
+                        <span><i class="ri-psychotherapy-line"></i></span>
+                        <h4>Neurología</h4>
+                        <p>
+                            Diagnóstico y tratamiento avanzado de trastornos del sistema nervioso.
+                        </p>
+                        <!-- Redirigir a la sección de servicios en la misma página -->
+                        <a href="#services">Saber más</a>
+                    </div>
+                    <div th:if="${#lists.isEmpty(servicios)}" class="service__card" data-index="2">
+                        <span><i class="ri-surgical-mask-line"></i></span>
+                        <h4>Cirugía General</h4>
+                        <p>
+                            Procedimientos quirúrgicos de última generación realizados por cirujanos expertos.
+                        </p>
+                        <!-- Redirigir a la sección de servicios en la misma página -->
+                        <a href="#services">Saber más</a>
+                    </div>
+                </div>
+
+                <button class="carousel-arrow next" id="nextService">
+                    <i class="ri-arrow-right-s-line"></i>
+                </button>
+
+                <!-- Indicadores del carrusel -->
+                <div class="carousel-indicators" id="carouselIndicators">
+                    <!-- Los indicadores se generarán dinámicamente con JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about" id="about">
+        <div class="section__container">
+            <div class="about__content">
+                <h2 class="section__title">Sobre SaludCuidado</h2>
+                <p>
+                    En SaludCuidado, nuestra misión es proporcionar atención médica de calidad excepcional en un ambiente acogedor y compasivo. Con años de experiencia y un equipo de profesionales dedicados, nos esforzamos por mejorar la salud y el bienestar de nuestra comunidad.
+                </p>
+                <p>
+                    Utilizamos tecnología médica de vanguardia y aplicamos las últimas investigaciones para ofrecer tratamientos innovadores y efectivos. Nuestro enfoque centrado en el paciente garantiza que recibas la atención personalizada que mereces.
+                </p>
+                <a href="#" class="btn btn-primary">Conoce Nuestra Historia</a>
+            </div>
+            <div class="about__image">
+                <img th:src="@{/image/doctor33.png}" alt="Equipo médico de SaludCuidado" />
+            </div>
+        </div>
+    </section>
+
+    <section class="why">
+        <div class="section__container">
+            <div class="why__image">
+                <img th:src="@{/image/doctor34.png}" alt="Instalaciones modernas de SaludCuidado" />
+            </div>
+            <div class="why__content">
+                <h2 class="section__title">¿Por Qué Elegirnos?</h2>
+                <p>
+                    En SaludCuidado, nos distinguimos por nuestro compromiso con la excelencia y la atención centrada en el paciente.
+                </p>
+                <div class="why__grid">
+                    <div class="why__item">
+                        <span><i class="ri-user-heart-line"></i></span>
+                        <div>
+                            <h4>Atención Personalizada</h4>
+                            <p>
+                                Cada paciente recibe un plan de tratamiento adaptado a sus necesidades específicas.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="why__item">
+                        <span><i class="ri-hospital-line"></i></span>
+                        <div>
+                            <h4>Instalaciones de Vanguardia</h4>
+                            <p>
+                                Contamos con la última tecnología médica para diagnósticos precisos y tratamientos efectivos.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="why__item">
+                        <span><i class="ri-team-line"></i></span>
+                        <div>
+                            <h4>Equipo de Expertos</h4>
+                            <p>
+                                Nuestros médicos y personal son líderes en sus campos, comprometidos con tu salud.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="doctors" id="doctors">
+        <div class="section__container">
+            <div class="doctors__header">
+                <div class="doctors__header__content">
+                    <h2 class="section__title">Nuestros Doctores Destacados</h2>
+                    <p>
+                        Conoce a algunos de nuestros especialistas más destacados, dedicados a proporcionar el mejor cuidado para tu salud.
+                    </p>
+                </div>
+                <a href="/doctores" class="btn btn-outline">Ver Todos los Doctores</a>
+            </div>
+            <div class="doctors__grid">
+                <div th:each="doctor : ${doctoresDestacados}" class="doctor__card">
+                    <div class="doctor__image">
+                        <img th:src="${doctor.imagenUrl != null ? doctor.imagenUrl : '/image/doctor-placeholder.jpg'}" alt="doctor" />
+                        <div class="doctor__socials">
+                            <span><i class="ri-linkedin-box-fill"></i></span>
+                            <span><i class="ri-twitter-fill"></i></span>
+                        </div>
+                    </div>
+                    <div class="doctor__info">
+                        <h4 th:text="${'Dr. ' + doctor.nombre + ' ' + doctor.apellido}">Dr. Nombre Apellido</h4>
+                        <p th:text="${doctor.especialidad}">Especialidad</p>
+                        <!-- Agregar botón que redirija a la sección de doctores en la misma página -->
+                        <a href="#doctors" class="doctor-link">Ver perfil</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="section__container">
+            <h2 class="section__title">Tu Salud es Nuestra Prioridad</h2>
+            <p>Agenda una cita hoy y da el primer paso hacia una vida más saludable.</p>
+            <a href="/reservar" class="btn btn-primary">Reservar Cita Ahora</a>
+        </div>
+    </section>
+</main>
+
+<!-- Incluir el fragmento del footer -->
+<div th:replace="fragments/fragments :: footer"></div>
+
+<!-- Script para el carrusel de servicios -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const carousel = document.getElementById('servicesCarousel');
+        const prevBtn = document.getElementById('prevService');
+        const nextBtn = document.getElementById('nextService');
+        const indicatorsContainer = document.getElementById('carouselIndicators');
+
+        // Obtener todos los servicios
+        const services = carousel.querySelectorAll('.service__card');
+        const totalServices = services.length;
+        let currentIndex = 0;
+
+        // Ocultar todos los servicios excepto el primero
+        services.forEach((service, index) => {
+            if (index !== 0) {
+                service.style.display = 'none';
+            }
+        });
+
+        // Crear indicadores
+        for (let i = 0; i < totalServices; i++) {
+            const indicator = document.createElement('div');
+            indicator.classList.add('carousel-indicator');
+            if (i === 0) {
+                indicator.classList.add('active');
+            }
+            indicator.dataset.index = i;
+            indicator.addEventListener('click', () => {
+                goToSlide(i);
+            });
+            indicatorsContainer.appendChild(indicator);
+        }
+
+        // Función para ir a un slide específico
+        function goToSlide(index) {
+            // Ocultar el slide actual
+            services[currentIndex].style.display = 'none';
+
+            // Actualizar el índice actual
+            currentIndex = index;
+
+            // Si el índice es menor que 0, ir al último slide
+            if (currentIndex < 0) {
+                currentIndex = totalServices - 1;
+            }
+
+            // Si el índice es mayor que el total de slides, volver al primero
+            if (currentIndex >= totalServices) {
+                currentIndex = 0;
+            }
+
+            // Mostrar el nuevo slide
+            services[currentIndex].style.display = 'block';
+
+            // Actualizar los indicadores
+            const indicators = indicatorsContainer.querySelectorAll('.carousel-indicator');
+            indicators.forEach((indicator, i) => {
+                if (i === currentIndex) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            });
+        }
+
+        // Evento para el botón anterior
+        prevBtn.addEventListener('click', () => {
+            goToSlide(currentIndex - 1);
+        });
+
+        // Evento para el botón siguiente
+        nextBtn.addEventListener('click', () => {
+            goToSlide(currentIndex + 1);
+        });
+
+        // Cambiar automáticamente cada 5 segundos
+        setInterval(() => {
+            goToSlide(currentIndex + 1);
+        }, 5000);
+    });
+</script>
+</body>
+</html>

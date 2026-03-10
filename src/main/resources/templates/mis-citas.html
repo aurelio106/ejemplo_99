@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+            href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css"
+            rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/inicio.css}" />
+    <link rel="stylesheet" th:href="@{/css/mis-citas.css}" />
+    <title>SaludCuidado - Mis Citas</title>
+    <style>
+        /* Estilos generales */
+        :root {
+            --primary-color: #12ac8e;
+            --primary-color-dark: #0d846c;
+            --primary-color-light: #e9f7f7;
+            --secondary-color: #f39c12;
+            --secondary-color-dark: #e67e22;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --text-dark: #333333;
+            --text-light: #767268;
+            --white: #ffffff;
+            --gray-light: #f8f9fa;
+            --gray: #e9ecef;
+        }
+
+        /* Estilos para el botón Nueva Cita */
+        .appointments-actions .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .appointments-actions .btn:hover {
+            background-color: var(--secondary-color-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilos para las tarjetas de citas */
+        .appointment-card {
+            background-color: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1.75rem;
+            overflow: hidden;
+            display: flex;
+            transition: all 0.3s ease;
+            border: 1px solid var(--gray);
+            position: relative;
+        }
+
+        .appointment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Indicador de estado en la esquina superior derecha */
+        .appointment-status-indicator {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 0.5rem 1rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border-bottom-left-radius: 10px;
+            z-index: 1;
+        }
+
+        .appointment-status-indicator.programada {
+            background-color: var(--primary-color);
+        }
+
+        .appointment-status-indicator.completada {
+            background-color: var(--success-color);
+        }
+
+        .appointment-status-indicator.cancelada {
+            background-color: var(--danger-color);
+        }
+
+        .appointment-header {
+            background-color: var(--gray-light);
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 140px;
+            border-right: 1px solid var(--gray);
+        }
+
+        .appointment-date {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .appointment-date .day {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            line-height: 1;
+        }
+
+        .appointment-date .month {
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-dark);
+            margin-top: 0.25rem;
+        }
+
+        .appointment-date .year {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        .appointment-time {
+            display: flex;
+            align-items: center;
+            color: var(--text-dark);
+            font-weight: 500;
+            background-color: var(--white);
+            padding: 0.5rem 0.75rem;
+            border-radius: 50px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .appointment-time i {
+            margin-right: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        .appointment-content {
+            padding: 1.75rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .appointment-content h3 {
+            margin: 0 0 0.75rem 0;
+            color: var(--text-dark);
+            font-size: 1.35rem;
+        }
+
+        .appointment-service {
+            color: var(--text-light);
+            font-weight: 500;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--gray);
+            font-size: 1.1rem;
+        }
+
+        .appointment-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .appointment-details p {
+            margin: 0.35rem 0;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .appointment-details p i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .appointment-details strong {
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-right: 0.35rem;
+        }
+
+        /* Estilos para los botones de acción */
+        .appointment-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: auto;
+        }
+
+        .appointment-actions button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+        }
+
+        .btn-cancel {
+            background-color: var(--white);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        .btn-cancel:hover {
+            background-color: var(--danger-color);
+            color: var(--white);
+        }
+
+        .btn-cancel:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: var(--gray-light);
+            color: var(--text-light);
+            border-color: var(--gray);
+        }
+
+        /* Mensaje de no citas */
+        .no-appointments {
+            text-align: center;
+            padding: 4rem 1rem;
+            background-color: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .no-data-message {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .no-data-message i {
+            font-size: 3.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            opacity: 0.8;
+        }
+
+        .no-data-message h3 {
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            font-size: 1.5rem;
+        }
+
+        .no-data-message p {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Mensaje de éxito */
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .success-message i {
+            font-size: 1.5rem;
+        }
+
+        /* Modal de confirmación */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            background-color: var(--primary-color-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.35rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--danger-color);
+        }
+
+        .modal-body {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .modal-icon {
+            font-size: 3.5rem;
+            color: var(--warning-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-body h4 {
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            font-size: 1.25rem;
+        }
+
+        .modal-body p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            border-top: 1px solid var(--gray);
+        }
+
+        .modal-footer button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-light);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--gray);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: var(--white);
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        /* Estilos responsivos */
+        @media (max-width: 768px) {
+            .appointment-card {
+                flex-direction: column;
+            }
+
+            .appointment-header {
+                border-right: none;
+                border-bottom: 1px solid var(--gray);
+                padding: 1.25rem;
+                flex-direction: row;
+                justify-content: space-between;
+                min-width: auto;
+            }
+
+            .appointment-date {
+                margin-bottom: 0;
+                flex-direction: row;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .appointment-date .day {
+                font-size: 1.5rem;
+            }
+
+            .appointment-details {
+                grid-template-columns: 1fr;
+            }
+
+            .appointment-actions {
+                flex-direction: column;
+            }
+
+            .appointment-actions button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .appointment-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        /* Filtros de citas */
+        .appointments-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-button {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            background-color: var(--gray-light);
+            color: var(--text-dark);
+            border: 1px solid var(--gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-button:hover {
+            background-color: var(--gray);
+        }
+
+        .filter-button.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            width: 100%;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loader-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--gray);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<!-- Incluir el fragmento del banner principal -->
+<div th:replace="fragments/fragments :: header(activeLink=${activeLink})"></div>
+
+<main>
+    <section class="section__container page-title">
+        <h1>Mis Citas</h1>
+        <p>Gestiona tus citas médicas programadas</p>
+    </section>
+
+    <section class="section__container">
+        <!-- Mensaje de éxito -->
+        <div th:if="${mensaje}" class="success-message">
+            <i class="ri-check-line"></i>
+            <p th:text="${mensaje}"></p>
+        </div>
+
+        <div class="appointments-container">
+            <div class="appointments-actions">
+                <a href="/reservar" class="btn">
+                    <i class="ri-add-line"></i> Nueva Cita
+                </a>
+            </div>
+
+            <!-- Filtros de citas -->
+            <div class="appointments-filters">
+                <button class="filter-button active" data-filter="todas">Todas</button>
+                <button class="filter-button" data-filter="programada">Programadas</button>
+                <button class="filter-button" data-filter="completada">Completadas</button>
+                <button class="filter-button" data-filter="cancelada">Canceladas</button>
+            </div>
+
+            <!-- Loader -->
+            <div id="loader" class="loader">
+                <div class="loader-spinner"></div>
+                <p>Cargando citas...</p>
+            </div>
+
+            <div class="appointments-list" th:if="${not #lists.isEmpty(citas)}">
+                <div th:each="cita : ${citas}" th:class="'appointment-card cita-' + ${cita.estado?.toLowerCase() ?: 'programada'}" th:data-estado="${cita.estado?.toLowerCase() ?: 'programada'}">
+                    <!-- Indicador de estado -->
+                    <div th:class="'appointment-status-indicator ' + ${cita.estado?.toLowerCase() ?: 'programada'}" th:text="${cita.estado ?: 'PROGRAMADA'}">
+                        PROGRAMADA
+                    </div>
+
+                    <div class="appointment-header">
+                        <div class="appointment-date">
+                            <span class="day" th:text="${#temporals.day(cita.fecha)}">15</span>
+                            <span class="month" th:text="${#temporals.monthNameShort(cita.fecha)}">May</span>
+                            <span class="year" th:text="${#temporals.year(cita.fecha)}">2023</span>
+                        </div>
+                        <div class="appointment-time">
+                            <i class="ri-time-line"></i>
+                            <span th:text="${#temporals.format(cita.hora, 'HH:mm')} + ' hrs'">10:30</span>
+                        </div>
+                    </div>
+                    <div class="appointment-content">
+                        <h3 th:text="${cita.doctorNombre != null ? 'Dr. ' + cita.doctorNombre + ' ' + cita.doctorApellido : 'Consulta General'}">
+                            Dr. Nombre Apellido
+                        </h3>
+                        <p class="appointment-service" th:if="${cita.servicioNombre != null}" th:text="${cita.servicioNombre}">
+                            Nombre del Servicio
+                        </p>
+                        <p class="appointment-service" th:unless="${cita.servicioNombre != null}">
+                            Consulta General
+                        </p>
+                        <div class="appointment-details">
+                            <p>
+                                <i class="ri-user-line"></i>
+                                <strong>Nombre:</strong> <span th:text="${cita.nombre + ' ' + cita.apellido}">Nombre Apellido</span>
+                            </p>
+                            <p>
+                                <i class="ri-profile-line"></i>
+                                <strong>Cédula:</strong> <span th:text="${cita.cedula}">1234567890</span>
+                            </p>
+                            <p>
+                                <i class="ri-phone-line"></i>
+                                <strong>Teléfono:</strong> <span th:text="${cita.telefono}">555-123-4567</span>
+                            </p>
+                            <p>
+                                <i class="ri-mail-line"></i>
+                                <strong>Correo:</strong> <span th:text="${cita.correo}">usuario@example.com</span>
+                            </p>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="appointment-actions">
+                            <!-- Botón de cancelar solo visible si la cita está programada -->
+                            <button th:if="${cita.estado == null || cita.estado == 'PROGRAMADA'}"
+                                    class="btn-cancel cancel-appointment"
+                                    th:data-id="${cita.id}"
+                                    th:data-doctor="${cita.doctorNombre != null ? 'Dr. ' + cita.doctorNombre + ' ' + cita.doctorApellido : 'Consulta General'}"
+                                    th:data-fecha="${#temporals.format(cita.fecha, 'dd/MM/yyyy')}"
+                                    th:data-hora="${#temporals.format(cita.hora, 'HH:mm')}">
+                                <i class="ri-close-circle-line"></i> Cancelar Cita
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="no-appointments" th:if="${#lists.isEmpty(citas)}">
+                <div class="no-data-message">
+                    <i class="ri-calendar-line"></i>
+                    <h3>No tienes citas programadas</h3>
+                    <p>Reserva tu primera cita médica para comenzar a cuidar tu salud.</p>
+                    <a href="/reservar" class="btn">
+                        <i class="ri-add-line"></i> Reservar Cita
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal de confirmación para cancelar cita -->
+    <div id="cancelModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirmar Cancelación</h3>
+                <button type="button" class="modal-close" id="closeModal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-icon">
+                    <i class="ri-error-warning-line"></i>
+                </div>
+                <h4>¿Estás seguro de que deseas cancelar esta cita?</h4>
+                <p id="citaDetails">Cita con Dr. Nombre Apellido el 15/05/2023 a las 10:30 hrs.</p>
+                <p>Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelarAccion">
+                    Volver
+                </button>
+                <button type="button" class="btn-danger" id="confirmarCancelacion">
+                    Sí, Cancelar Cita
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Incluir el fragmento del footer -->
+<div th:replace="fragments/fragments :: footer"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Referencias a elementos del DOM
+        const filterButtons = document.querySelectorAll('.filter-button');
+        const appointmentCards = document.querySelectorAll('.appointment-card');
+        const cancelButtons = document.querySelectorAll('.cancel-appointment');
+        const cancelModal = document.getElementById('cancelModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelarAccion = document.getElementById('cancelarAccion');
+        const confirmarCancelacion = document.getElementById('confirmarCancelacion');
+        const citaDetails = document.getElementById('citaDetails');
+        const loader = document.getElementById('loader');
+
+        // Variable para almacenar el ID de la cita a cancelar
+        let citaIdACancelar = null;
+
+        // Función para mostrar/ocultar el loader
+        function toggleLoader(show) {
+            loader.style.display = show ? 'block' : 'none';
+        }
+
+        // Función para mostrar mensaje de éxito
+        function mostrarMensajeExito(mensaje) {
+            const successMessage = document.createElement('div');
+            successMessage.className = 'success-message';
+            successMessage.innerHTML = `
+                <i class="ri-check-line"></i>
+                <p>${mensaje}</p>
+            `;
+
+            const section = document.querySelector('.section__container');
+            section.insertBefore(successMessage, section.firstChild);
+
+            // Eliminar mensaje después de 5 segundos
+            setTimeout(() => {
+                successMessage.remove();
+            }, 5000);
+        }
+
+        // Función para mostrar mensaje de error
+        function mostrarMensajeError(mensaje) {
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'success-message';
+            errorMessage.style.backgroundColor = '#f8d7da';
+            errorMessage.style.color = '#721c24';
+            errorMessage.style.borderLeftColor = '#f5c6cb';
+            errorMessage.innerHTML = `
+                <i class="ri-error-warning-line"></i>
+                <p>${mensaje}</p>
+            `;
+
+            const section = document.querySelector('.section__container');
+            section.insertBefore(errorMessage, section.firstChild);
+
+            // Eliminar mensaje después de 5 segundos
+            setTimeout(() => {
+                errorMessage.remove();
+            }, 5000);
+        }
+
+        // Filtrar citas
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remover clase active de todos los botones
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+
+                // Agregar clase active al botón clickeado
+                this.classList.add('active');
+
+                // Obtener el filtro seleccionado
+                const filter = this.getAttribute('data-filter');
+
+                // Mostrar/ocultar citas según el filtro
+                appointmentCards.forEach(card => {
+                    if (filter === 'todas' || card.getAttribute('data-estado') === filter) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Abrir modal de cancelación
+        cancelButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                citaIdACancelar = this.getAttribute('data-id');
+                const doctor = this.getAttribute('data-doctor');
+                const fecha = this.getAttribute('data-fecha');
+                const hora = this.getAttribute('data-hora');
+
+                // Actualizar detalles en el modal
+                citaDetails.textContent = `Cita con ${doctor} el ${fecha} a las ${hora} hrs.`;
+
+                // Mostrar modal
+                cancelModal.classList.add('active');
+            });
+        });
+
+        // Cerrar modal
+        closeModal.addEventListener('click', function() {
+            cancelModal.classList.remove('active');
+        });
+
+        cancelarAccion.addEventListener('click', function() {
+            cancelModal.classList.remove('active');
+        });
+
+        // Confirmar cancelación de cita
+        confirmarCancelacion.addEventListener('click', function() {
+            if (!citaIdACancelar) return;
+
+            // Deshabilitar botón para evitar múltiples clics
+            this.disabled = true;
+            this.textContent = 'Procesando...';
+
+            // Mostrar loader
+            toggleLoader(true);
+
+            // Enviar solicitud para cancelar la cita
+            fetch(`/citas/${citaIdACancelar}/cancelar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || ''
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al cancelar la cita');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Cerrar modal
+                cancelModal.classList.remove('active');
+
+                // Actualizar UI
+                const citaCard = document.querySelector(`.appointment-card[data-id="${citaIdACancelar}"]`);
+                if (citaCard) {
+                    // Actualizar clase y estado
+                    citaCard.className = 'appointment-card cita-cancelada';
+                    citaCard.setAttribute('data-estado', 'cancelada');
+
+                    // Actualizar indicador de estado
+                    const statusIndicator = citaCard.querySelector('.appointment-status-indicator');
+                    if (statusIndicator) {
+                        statusIndicator.className = 'appointment-status-indicator cancelada';
+                        statusIndicator.textContent = 'CANCELADA';
+                    }
+
+                    // Remover botón de cancelar
+                    const cancelButton = citaCard.querySelector('.cancel-appointment');
+                    if (cancelButton) {
+                        cancelButton.remove();
+                    }
+                }
+
+                // Mostrar mensaje de éxito
+                mostrarMensajeExito('Cita cancelada correctamente');
+
+                // Ocultar loader
+                toggleLoader(false);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarMensajeError('Error al cancelar la cita. Por favor, intente nuevamente.');
+
+                // Cerrar modal
+                cancelModal.classList.remove('active');
+
+                // Ocultar loader
+                toggleLoader(false);
+
+                // Restaurar botón
+                this.disabled = false;
+                this.textContent = 'Sí, Cancelar Cita';
+            });
+        });
+
+        // Cerrar modal al hacer clic fuera del contenido
+        window.addEventListener('click', function(event) {
+            if (event.target === cancelModal) {
+                cancelModal.classList.remove('active');
+            }
+        });
+    });
+</script>
+</body>
+</html>

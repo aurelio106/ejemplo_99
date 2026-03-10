@@ -2,14 +2,14 @@ FROM eclipse-temurin:21-jdk-jammy
 
 WORKDIR /app
 
-# Copiar el proyecto
+# Copiar todo el proyecto
 COPY . .
 
-# Dar permisos a Maven wrapper
+# Dar permisos a Maven
 RUN chmod +x mvnw
 
-# Compilar la aplicación
+# Compilar el proyecto
 RUN ./mvnw clean package -DskipTests
 
-# Ejecutar la aplicación
+# Ejecutar el jar generado
 CMD java -jar target/*.jar
